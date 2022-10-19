@@ -21,11 +21,33 @@ class RequestLine {
         }
         else {
             System.out.println( "is null...." );
-        }
-
+        }    
     }
+  
+    /**
+	 * @return the method
+	 */
+	public String getMethod() {
+		return method;
+	}
 
-    @Override
+
+	/**
+	 * @return the endpoint
+	 */
+	public String getEndpoint() {
+		return endpoint;
+	}
+
+
+	/**
+	 * @return the version
+	 */
+	public String getVersion() {
+		return version;
+	}
+
+	@Override
     public String toString() {
         return " METHOD IS -> " + this.method 
             + "\n ENDPOINT IS -> " + this.endpoint
@@ -49,7 +71,15 @@ public class RequestInfo {
         System.out.println("Done parsing request info!");
 
     }
-
+    
+    public RequestLine getRequestLine() {
+    	return requestLine;
+    }
+    
+    public List<String> getRequestHeaders() {
+    	return new LinkedList<String>(requestHeaders);
+    }
+    
     @Override
     public String toString() {
         return this.requestLine.toString();

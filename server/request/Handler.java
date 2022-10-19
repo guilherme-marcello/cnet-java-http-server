@@ -1,7 +1,7 @@
 package request;
 
 import java.net.Socket;
-
+import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -10,9 +10,11 @@ public class Handler extends Thread {
     
     private Socket socket;
     private int id;
-    public Handler(Socket socket, int id) {
+    private HashMap<String, String> contentDirectory;
+    public Handler(Socket socket, int id, HashMap<String, String> contentDirectory) {
         this.socket = socket;
         this.id = id;
+        this.contentDirectory = contentDirectory;
     }
 
     @Override 
@@ -33,9 +35,12 @@ public class Handler extends Thread {
             PrintWriter out = new PrintWriter(
                 this.socket.getOutputStream(), true 
             );
-
-            out.println("HTTP/1.1 200 OK " + Util.CRLF);
-
+            if (this.contentDirectory.containsKey(info.getRequestLine().getEndpoint())) {
+            	out.println("HTTP/1.1 200 OK " + Util.CRLF);
+            }
+            else {
+            	out.println("HTTP/1.1 404 page not found ");
+            }
             in.close();
             out.close();
             socket.close();
