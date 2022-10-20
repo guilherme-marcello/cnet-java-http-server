@@ -13,8 +13,7 @@ public class MyHttpServer {
         int id = 0;
         
         HashMap<String, String> contentDirectory = Util.getContentDirectory("directory");
-        System.out.println(contentDirectory);
-
+    
         while (true) {
             Handler taskSolver = new Handler(serverSocket.accept(), id, contentDirectory);
             id++;
