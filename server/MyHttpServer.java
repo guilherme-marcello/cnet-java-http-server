@@ -12,7 +12,8 @@ public class MyHttpServer {
         ServerSocket serverSocket = new ServerSocket(Integer.valueOf(PORT));
         int id = 0;
         
-        HashMap<String, String> contentDirectory = Util.getContentDirectory();
+        HashMap<String, String> contentDirectory = Util.getContentDirectory("directory");
+        System.out.println(contentDirectory);
 
         while (true) {
             Handler taskSolver = new Handler(serverSocket.accept(), id, contentDirectory);

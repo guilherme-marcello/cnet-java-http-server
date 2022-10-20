@@ -10,14 +10,14 @@ import java.util.HashMap;
 public class Util {
 	public static final String CRLF = "\r\n";
 	
-	public static HashMap<String, String> getContentDirectory () throws IOException {
+	public static HashMap<String, String> getContentDirectory (String directory) throws IOException {
 		HashMap<String, String> contentDirectory = new HashMap<String, String>();
    
-        Path directoryPath = FileSystems.getDefault().getPath("directory");    
+        Path directoryPath = FileSystems.getDefault().getPath(directory);    
         File folder = new File(directoryPath.toString());
         File[] files = folder.listFiles();
         for (File file : files) {
-        	contentDirectory.put(file.toString(), Files.readString(Path.of(file.toString())));
+        	contentDirectory.put("/" + file.getName(), Files.readString(Path.of(file.toString())));
 		}
 		
 		return contentDirectory;	
