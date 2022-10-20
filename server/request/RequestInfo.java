@@ -5,56 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.LinkedList;
 
-class RequestLine {
-    private String method = null;
-    private String endpoint = null;
-    private String version = null; 
-    public RequestLine(String content) {
-        System.out.println(content);
-        if (content != null) {
-            String[] line_split = content.split(" ");
-            if (line_split.length == 3) {
-                this.method = line_split[0];
-                this.endpoint = line_split[1];
-                this.version = line_split[2];
-            }
-        }
-        else {
-            System.out.println( "is null...." );
-        }    
-    }
-  
-    /**
-	 * @return the method
-	 */
-	public String getMethod() {
-		return method;
-	}
-
-
-	/**
-	 * @return the endpoint
-	 */
-	public String getEndpoint() {
-		return endpoint;
-	}
-
-
-	/**
-	 * @return the version
-	 */
-	public String getVersion() {
-		return version;
-	}
-
-	@Override
-    public String toString() {
-        return " METHOD IS -> " + this.method 
-            + "\n ENDPOINT IS -> " + this.endpoint
-            + "\n VERSION IS -> " + this.version;
-    }
-}
-
 
 public class RequestInfo {
     private RequestLine requestLine;
@@ -68,12 +18,10 @@ public class RequestInfo {
             this.requestHeaders.add(header);
             header = in.readLine();
         }
-        System.out.println("Done parsing request info!");
-
     }
     
     public RequestLine getRequestLine() {
-    	return requestLine;
+    	return this.requestLine;
     }
     
     public List<String> getRequestHeaders() {
