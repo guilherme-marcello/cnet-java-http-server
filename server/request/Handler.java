@@ -2,6 +2,7 @@ package request;
 
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -37,12 +38,15 @@ public class Handler extends Thread {
     private Socket socket;
     private int id;
     private HashMap<String, String> contentDirectory;
+    private List<Integer> idRegistry;
     private HandlerLogger logger;
-    public Handler(Socket socket, int id, HashMap<String, String> contentDirectory) {
+    public Handler(Socket socket, int id, HashMap<String, String> contentDirectory, List<Integer> idRegistry) {
         this.socket = socket;
         this.id = id;
         this.logger = new HandlerLogger(this.id);
         this.contentDirectory = contentDirectory;
+        this.idRegistry = idRegistry;
+
     }
 
     @Override 
@@ -59,37 +63,45 @@ public class Handler extends Thread {
                 this.socket.getOutputStream(), true 
             );
 
-            RequestInfo info = new RequestInfo(in);
-
-            this.logger.info("Preparing response!");
-            RequestLine requestLine = info.getRequestLine();
-
-            if (requestLine.isValid()) {
-                switch (requestLine.getMethod()) {
-                    case "GET":
-                        if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
-                            this.logger.info("Received a GET request to an existing resource! Returning 200");
-                            out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(requestLine.getEndpoint()) + Util.CRLF);
-                        }
-                        else {
-                            this.logger.info("Received a GET request to an unavailable resource! Returning 404");
-                            out.println("HTTP/1.1 404 Not Found");
-                        }
-                        break;
-                    case "POST":
-                        out.println("HTTP/1.1 200 OK");
-                        this.logger.info("Payload is -> " + info.getPayload());
-                        break;
-                    default:
-                        this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
-                        out.println("HTTP/1.1 405 Method Not Allowed");
-                        break;
+            if (this.idRegistry.size() == 5) {
+                out.println("HTTP/1.1 503 Service Unavailable " + Util.CRLF);
+            } else {
+                this.idRegistry.add(this.id);
+                RequestInfo info = new RequestInfo(in);
+                this.logger.info("Preparing response!");
+                RequestLine requestLine = info.getRequestLine();
+    
+                if (requestLine.isValid()) {
+                    switch (requestLine.getMethod()) {
+                        case "GET":
+                            if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
+                                this.logger.info("Received a GET request to an existing resource! Returning 200");
+                                out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(requestLine.getEndpoint()) + Util.CRLF);
+                            }
+                            else {
+                                this.logger.info("Received a GET request to an unavailable resource! Returning 404");
+                                out.println("HTTP/1.1 404 Not Found");
+                            }
+                            break;
+                        case "POST":
+                            out.println("HTTP/1.1 200 OK");
+                            this.logger.info("Payload is -> " + info.getPayload());
+                            break;
+                        default:
+                            this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
+                            out.println("HTTP/1.1 405 Method Not Allowed");
+                            break;
+                    }
                 }
+                else {
+                    this.logger.error("Invalid request! Returning 400 Bad Request");
+                    out.println("HTTP/1.1 400 Bad Request");
+                }
+                if (System.getenv("DEBUG") != null)
+                    Thread.sleep(100000);
+                this.idRegistry.remove(Integer.valueOf(id));
             }
-            else {
-                this.logger.error("Invalid request! Returning 400 Bad Request");
-                out.println("HTTP/1.1 400 Bad Request");
-            }
+            
             in.close();
             out.close();
             socket.close();
