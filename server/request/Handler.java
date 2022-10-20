@@ -51,42 +51,49 @@ public class Handler extends Thread {
         try {
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(
-                    this.socket.getInputStream() 
-                ) 
+                    this.socket.getInputStream()
+                )
             );
 
-            // parse socket info as a http request
-            RequestInfo info = new RequestInfo(in);
-            //System.out.println(info);
-
-            this.logger.info("Preparing response" );
             PrintWriter out = new PrintWriter(
                 this.socket.getOutputStream(), true 
             );
 
+            RequestInfo info = new RequestInfo(in);
+
+            this.logger.info("Preparing response!");
             RequestLine requestLine = info.getRequestLine();
 
             if (requestLine.isValid()) {
-                if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
-                    this.logger.info("contem chaveeee -> ");
-                    this.logger.info(requestLine.getEndpoint());
-                    out.println("HTTP/1.1 200 OK " + Util.CRLF);
-                }
-                else {
-                    this.logger.info("nao contem chaveeee");
-                    this.logger.info(requestLine.getEndpoint());
-                    out.println("HTTP/1.1 404 page not found ");
+                switch (requestLine.getMethod()) {
+                    case "GET":
+                        if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
+                            this.logger.info("Received a GET request to an existing resource! Returning 200");
+                            out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(requestLine.getEndpoint()) + Util.CRLF);
+                        }
+                        else {
+                            this.logger.info("Received a GET request to an unavailable resource! Returning 404");
+                            out.println("HTTP/1.1 404 Not Found");
+                        }
+                        break;
+                    case "POST":
+                        out.println("HTTP/1.1 200 OK");
+                        this.logger.info("Payload is -> " + info.getPayload());
+                        break;
+                    default:
+                        this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
+                        out.println("HTTP/1.1 405 Method Not Allowed");
+                        break;
                 }
             }
             else {
-                this.logger.error("Invalid request!!");
+                this.logger.error("Invalid request! Returning 400 Bad Request");
+                out.println("HTTP/1.1 400 Bad Request");
             }
-
-
             in.close();
             out.close();
             socket.close();
-            this.logger.info( "Connection closed" );
+            this.logger.info("Connection closed");
 
         } catch (Exception e) {
             e.printStackTrace();
