@@ -26,7 +26,7 @@ public class RequestInfo {
             dataChar = in.read();
             payloadComposer.append((char) dataChar);
         }
-        this.payload = payloadComposer.toString();
+        this.payload = payloadComposer.toString().replaceAll("[\\n\\t\\r ]", "");
     }
     
     public RequestLine getRequestLine() {
