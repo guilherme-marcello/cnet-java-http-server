@@ -54,9 +54,19 @@ public class Handler extends Thread {
 
     }
 
-    @Override 
+    @Override
     public void run() {
-        this.logger.info("Handling new connection!");
+        this.logger.info("Handling new client!");
+        while (this.socket.isConnected()) {
+            this.handle_request();
+            
+        }
+    }
+
+    private void handle_request() {
+        if (this.socket.isClosed())
+            return;
+        this.logger.info("Handling new request!");
         try {
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(
@@ -121,8 +131,8 @@ public class Handler extends Thread {
             
             in.close();
             out.close();
-            socket.close();
-            this.logger.info("Connection closed");
+            //socket.close();
+            this.logger.info("Request processing is finished.");
 
         } catch (Exception e) {
             e.printStackTrace();
