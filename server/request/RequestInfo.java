@@ -10,18 +10,35 @@ public class RequestInfo {
     private final List<String> requestHeaders;
     private final String payload;
     public RequestInfo(BufferedReader in) throws IOException {
-        this.requestLine = new RequestLine(in.readLine());
+        StringBuilder requestLineComposer = new StringBuilder();
+
+        int dataChar = 0;
+        while (in.ready() && dataChar != '\n') {
+            dataChar = in.read();
+            requestLineComposer.append((char) dataChar);
+        }
+        this.requestLine = new RequestLine(requestLineComposer.toString());
+        
         this.requestHeaders = new LinkedList<>();
 
-        String header;
-        while ((header = in.readLine()) != null) {
-            if (header.length() == 0)
+        while (in.ready()) {
+            StringBuilder headerComposer = new StringBuilder();
+            dataChar = 0;
+            while (dataChar != '\n') {
+                dataChar = in.read();
+                headerComposer.append((char) dataChar);
+            }
+            String header = headerComposer.toString();
+            if (header.equals("\r\n")) {
+                System.out.println("CRLF!! begin of body..");
                 break;
-            this.requestHeaders.add(header);
+            }
+            this.requestHeaders.add(headerComposer.toString());
+            System.out.println(this.requestHeaders);
         }
+
         
         StringBuilder payloadComposer = new StringBuilder();
-        int dataChar;
         while (in.ready()) {
             dataChar = in.read();
             payloadComposer.append((char) dataChar);
