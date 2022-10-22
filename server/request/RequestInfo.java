@@ -26,7 +26,7 @@ public class RequestInfo {
             }
 
             String header = headerComposer.toString();
-            if (header.equals("\r\n")) {
+            if (header.equals("\r\n"))
                 break;
 
             this.requestHeaders.add(headerComposer.toString());

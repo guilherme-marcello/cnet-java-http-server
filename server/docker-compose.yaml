@@ -9,3 +9,13 @@ services:
       - SERVER_PORT=8081
     ports:
       - "8081:8081"
+
+  http-server-slow:
+    image: mp1:latest
+    build: .
+    container_name: http-server-slow
+    environment:
+      - SERVER_PORT=8082
+      - DEBUG=true
+    ports:
+      - "8082:8082"

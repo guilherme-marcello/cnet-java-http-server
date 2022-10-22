@@ -34,6 +34,11 @@ class HandlerLogger {
 }
 
 public class Handler extends Thread {
+    private static final int MAX_THREADS = 5;
+    private static final String THREADS_EXCEEDED_ERROR = String.format(
+        "The server does not handle more than %d requests simultaneously. Discarding this request.",
+        MAX_THREADS
+    );
     
     private Socket socket;
     private int id;
@@ -64,10 +69,14 @@ public class Handler extends Thread {
             );
 
             if (this.idRegistry.size() == 5) {
+                this.logger.error(THREADS_EXCEEDED_ERROR);
                 out.println("HTTP/1.1 503 Service Unavailable " + Util.CRLF);
             } else {
                 this.idRegistry.add(this.id);
+
+                this.logger.info("Parsing data from socket!");
                 RequestInfo info = new RequestInfo(in);
+                
                 this.logger.info("Preparing response!");
                 RequestLine requestLine = info.getRequestLine();
                 RequestHeaders requestHeaders = info.getRequestHeaders();
@@ -76,11 +85,11 @@ public class Handler extends Thread {
                     switch (requestLine.getMethod()) {
                         case "GET":
                             if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
-                                this.logger.info("Received a GET request to an existing resource! Returning 200");
+                                this.logger.info("Received a valid GET request to an existing resource! Returning 200");
                                 out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(requestLine.getEndpoint()) + Util.CRLF);
                             }
                             else {
-                                this.logger.info("Received a GET request to an unavailable resource! Returning 404");
+                                this.logger.info("Received a valid GET request to an unavailable resource! Returning 404");
                                 out.println("HTTP/1.1 404 Not Found");
                             }
                             break;
@@ -98,8 +107,10 @@ public class Handler extends Thread {
                     this.logger.error("Invalid request! Returning 400 Bad Request");
                     out.println("HTTP/1.1 400 Bad Request");
                 }
-                if (System.getenv("DEBUG") != null)
-                    Thread.sleep(100000);
+                if (System.getenv("DEBUG") != null) {
+                    this.logger.info("For debug purposes, pausing this execution...");
+                    Thread.sleep(6000);
+                }
                 this.idRegistry.remove(Integer.valueOf(id));
             }
             
