@@ -4,17 +4,15 @@ public class RequestLine {
     private String method = null;
     private String endpoint = null;
     private String version = null; 
-    private boolean isValid;
+    private boolean isValid = false;;
     public RequestLine(String content) {
-        if (content != null) {
+        if (content != null && Models.isRequestLineValid(content)) {
+            this.isValid = true;
             String[] line_split = content.split(" ");
-            if (line_split.length == 3) {
-                this.method = line_split[0];
-                this.endpoint = line_split[1];
-                this.version = line_split[2];
-            }
-        }
-        this.isValid = this.method != null && this.endpoint != null && this.version != null;  
+            this.method = line_split[0];
+            this.endpoint = line_split[1];
+            this.version = line_split[2];
+        }  
     }
   
     /**
