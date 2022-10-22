@@ -70,8 +70,9 @@ public class Handler extends Thread {
                 RequestInfo info = new RequestInfo(in);
                 this.logger.info("Preparing response!");
                 RequestLine requestLine = info.getRequestLine();
+                RequestHeaders requestHeaders = info.getRequestHeaders();
     
-                if (requestLine.isValid()) {
+                if (requestLine.isValid() && requestHeaders.isValid()) {
                     switch (requestLine.getMethod()) {
                         case "GET":
                             if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {

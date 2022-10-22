@@ -2,12 +2,10 @@ package request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
-import java.util.LinkedList;
 
 public class RequestInfo {
     private RequestLine requestLine;
-    private final List<String> requestHeaders;
+    private final RequestHeaders requestHeaders = new RequestHeaders();
     private final String payload;
     public RequestInfo(BufferedReader in) throws IOException {
         StringBuilder requestLineComposer = new StringBuilder();
@@ -19,8 +17,6 @@ public class RequestInfo {
         }
         this.requestLine = new RequestLine(requestLineComposer.toString());
         
-        this.requestHeaders = new LinkedList<>();
-
         while (in.ready()) {
             StringBuilder headerComposer = new StringBuilder();
             dataChar = 0;
@@ -28,13 +24,12 @@ public class RequestInfo {
                 dataChar = in.read();
                 headerComposer.append((char) dataChar);
             }
+
             String header = headerComposer.toString();
             if (header.equals("\r\n")) {
-                System.out.println("CRLF!! begin of body..");
                 break;
-            }
+
             this.requestHeaders.add(headerComposer.toString());
-            System.out.println(this.requestHeaders);
         }
 
         
@@ -50,8 +45,8 @@ public class RequestInfo {
     	return this.requestLine;
     }
     
-    public List<String> getRequestHeaders() {
-    	return new LinkedList<String>(requestHeaders);
+    public RequestHeaders getRequestHeaders() {
+    	return this.requestHeaders;
     }
 
     public String getPayload() {
