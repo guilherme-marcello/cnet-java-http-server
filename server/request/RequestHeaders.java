@@ -22,4 +22,13 @@ public class RequestHeaders {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder textualHeaders = new StringBuilder("[Headers]\n");
+        for (String header : this.headers) {
+            textualHeaders.append(header);
+        }
+        return textualHeaders.toString();
+    }
+
 }

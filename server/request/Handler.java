@@ -68,7 +68,7 @@ public class Handler extends Thread {
                 this.socket.getOutputStream(), true 
             );
 
-            if (this.idRegistry.size() == 5) {
+            if (this.idRegistry.size() >= MAX_THREADS) {
                 this.logger.error(THREADS_EXCEEDED_ERROR);
                 out.println("HTTP/1.1 503 Service Unavailable " + Util.CRLF);
             } else {
@@ -78,8 +78,12 @@ public class Handler extends Thread {
                 RequestInfo info = new RequestInfo(in);
                 
                 this.logger.info("Preparing response!");
+                
                 RequestLine requestLine = info.getRequestLine();
+                this.logger.info(requestLine.toString());
+
                 RequestHeaders requestHeaders = info.getRequestHeaders();
+                this.logger.info(requestHeaders.toString());
     
                 if (requestLine.isValid() && requestHeaders.isValid()) {
                     switch (requestLine.getMethod()) {
@@ -94,6 +98,7 @@ public class Handler extends Thread {
                             }
                             break;
                         case "POST":
+                            
                             out.println("HTTP/1.1 200 OK");
                             this.logger.info("Payload is -> " + info.getPayload());
                             break;
