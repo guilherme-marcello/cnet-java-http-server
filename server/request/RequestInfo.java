@@ -26,10 +26,9 @@ public class RequestInfo {
             }
 
             String header = headerComposer.toString();
+            this.requestHeaders.add(header);
             if (header.equals("\r\n"))
                 break;
-
-            this.requestHeaders.add(headerComposer.toString());
         }
 
         
@@ -55,6 +54,9 @@ public class RequestInfo {
     
     @Override
     public String toString() {
-        return this.requestLine.toString();
+        return String.format(
+            "\n[BEGIN - RequestInfo]\n%s%s%s[END - RequestInfo]",
+            this.requestLine.toString(), this.requestHeaders.toString(), this.payload + "\n"
+        );
     }
 }

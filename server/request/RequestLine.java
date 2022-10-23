@@ -45,7 +45,7 @@ public class RequestLine {
 	@Override
     public String toString() {
         return String.format(
-            "[Request Line] %s %s %s",
+            "%s %s %s",
             this.method, this.endpoint, this.version
         );
     }
