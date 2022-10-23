@@ -1,12 +1,19 @@
 package request;
 
+// socket-related imports
 import java.net.Socket;
+import java.net.SocketException;
+
+// data handling-related imports
 import java.util.HashMap;
 import java.util.List;
+
+// IO-related imports
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+// logging-related imports
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -41,12 +48,30 @@ public class Handler extends Thread {
     );
     
     private Socket socket;
+    private BufferedReader in;
+    private PrintWriter out;
     private int id;
     private HashMap<String, String> contentDirectory;
     private List<Integer> idRegistry;
     private HandlerLogger logger;
-    public Handler(Socket socket, int id, HashMap<String, String> contentDirectory, List<Integer> idRegistry) {
+    public Handler(Socket socket, int id, HashMap<String, String> contentDirectory, List<Integer> idRegistry) throws SocketException {
         this.socket = socket;
+        try {
+            this.in = new BufferedReader(
+                new InputStreamReader(
+                    this.socket.getInputStream()
+                )
+            );
+    
+            this.out = new PrintWriter(
+                this.socket.getOutputStream(), true 
+            );            
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+
+
         this.id = id;
         this.logger = new HandlerLogger(this.id);
         this.contentDirectory = contentDirectory;
@@ -57,27 +82,23 @@ public class Handler extends Thread {
     @Override
     public void run() {
         this.logger.info("Handling new client!");
-        while (this.socket.isConnected()) {
+        while (!this.socket.isClosed()) {   
             this.handle_request();
-            
         }
+        this.logger.info("Finished client handling!");
     }
 
     private void handle_request() {
-        if (this.socket.isClosed())
+        try {
+            if (this.socket.getInputStream().available() <= 0)
+                return;           
+        } catch (Exception e) {
+            this.logger.error(e.toString());
             return;
+        }
+
         this.logger.info("Handling new request!");
         try {
-            BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                    this.socket.getInputStream()
-                )
-            );
-
-            PrintWriter out = new PrintWriter(
-                this.socket.getOutputStream(), true 
-            );
-
             if (this.idRegistry.size() >= MAX_THREADS) {
                 this.logger.error(THREADS_EXCEEDED_ERROR);
                 out.println("HTTP/1.1 503 Service Unavailable " + Util.CRLF);
@@ -86,15 +107,14 @@ public class Handler extends Thread {
 
                 this.logger.info("Parsing data from socket!");
                 RequestInfo info = new RequestInfo(in);
-                
-                this.logger.info("Preparing response!");
+                this.logger.info("Finished request info parsing!");
                 
                 RequestLine requestLine = info.getRequestLine();
-                this.logger.info(requestLine.toString());
-
                 RequestHeaders requestHeaders = info.getRequestHeaders();
-                this.logger.info(requestHeaders.toString());
-    
+                
+                this.logger.info(info.toString());
+                this.logger.info("Preparing response!");
+
                 if (requestLine.isValid() && requestHeaders.isValid()) {
                     switch (requestLine.getMethod()) {
                         case "GET":
@@ -108,9 +128,7 @@ public class Handler extends Thread {
                             }
                             break;
                         case "POST":
-                            
                             out.println("HTTP/1.1 200 OK");
-                            this.logger.info("Payload is -> " + info.getPayload());
                             break;
                         default:
                             this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
@@ -129,9 +147,6 @@ public class Handler extends Thread {
                 this.idRegistry.remove(Integer.valueOf(id));
             }
             
-            in.close();
-            out.close();
-            //socket.close();
             this.logger.info("Request processing is finished.");
 
         } catch (Exception e) {
