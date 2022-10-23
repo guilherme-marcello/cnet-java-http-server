@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  http-server:
+    image: mp1:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: http-server
+    environment:
+      - SERVER_PORT=8081
+    ports:
+      - "8081:8081"
