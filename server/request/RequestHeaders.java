@@ -15,7 +15,12 @@ public class RequestHeaders {
     }
 
     public boolean isValid() {
-        for (String header : this.headers) {
+        for (int i = 0; i < this.headers.size(); i++) {
+            String header = this.headers.get(i);
+            
+            if (header.equals(Util.CRLF))
+                return i == this.headers.size() - 1;
+                
             if (!Models.isHeaderValid(header))
                 return false;
         }
@@ -24,7 +29,7 @@ public class RequestHeaders {
 
     @Override
     public String toString() {
-        StringBuilder textualHeaders = new StringBuilder("[Headers]\n");
+        StringBuilder textualHeaders = new StringBuilder();
         for (String header : this.headers) {
             textualHeaders.append(header);
         }
