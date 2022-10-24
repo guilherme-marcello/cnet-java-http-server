@@ -130,7 +130,13 @@ public class Handler extends Thread {
                         }
                         break;
                     case "POST":
-                        out.println("HTTP/1.1 200 OK");
+                    	if (Models.isPayLoadValid(info.getPayload())) {
+                    		out.println("HTTP/1.1 200 OK");
+               			}
+                    	else {
+                    		this.logger.info("Received a valid POST request with an incorret format! Return 406");
+                    		out.println("HTTP/1.1 406 not Acceptable");
+                    	}
                         break;
                     default:
                         this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
