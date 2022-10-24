@@ -47,7 +47,8 @@ public class Handler extends Thread {
         "The server does not handle more than %d requests simultaneously. Discarding this request.",
         MAX_THREADS
     );
-    
+
+    private boolean closeConnection = false;
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -78,8 +79,8 @@ public class Handler extends Thread {
     @Override
     public void run() {
         this.logger.info("Handling new client!");
-        while (!this.socket.isClosed()) { 
-            try {
+        while (!this.socket.isClosed()){ 
+            try { 
                 this.handle_request();
             } catch (Exception e) {
                 this.logger.error("Unable to handle request.");
@@ -112,6 +113,11 @@ public class Handler extends Thread {
             this.logger.info("Preparing response!");
 
             if (requestLine.isValid() && requestHeaders.isValid()) {
+                if (requestHeaders.contains("Connection: close" + Util.CRLF)) {
+                    this.logger.info("Received a close connection header. Closing connection after sending response!");
+                    this.closeConnection = true;
+                }
+
                 switch (requestLine.getMethod()) {
                     case "GET":
                         if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
@@ -136,6 +142,11 @@ public class Handler extends Thread {
                 this.logger.error("Invalid request! Returning 400 Bad Request");
                 out.println("HTTP/1.1 400 Bad Request");
             }
+
+            if (this.closeConnection) {
+                this.socket.close();
+            }
+
             if (System.getenv("DEBUG") != null) {
                 this.logger.info("For debug purposes, pausing this execution...");
                 Thread.sleep(6000);

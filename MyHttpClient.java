@@ -66,6 +66,8 @@ public class MyHttpClient {
 	
 	public void close() {
 		try {
+			out.print("DELETE /session HTTP/1.1" + Util.CRLF + "Connection: close" + Util.CRLF);
+			out.flush();
 			this.in.close();
 			this.out.close();
 			this.socket.close();

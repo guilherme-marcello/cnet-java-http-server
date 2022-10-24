@@ -11,7 +11,11 @@ public class RequestHeaders {
     }
 
     public void add(String header) {
-        headers.add(header);
+        this.headers.add(header);
+    }
+
+    public boolean contains(String header) {
+        return this.headers.contains(header);
     }
 
     public boolean isValid() {
