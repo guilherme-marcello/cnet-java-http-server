@@ -1,41 +1,13 @@
+package mp1;
+
+import request.Logger;
 import request.Util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Date;
-import java.text.SimpleDateFormat;
 
-class ClientLogger {
-    public ClientLogger() {      
-    }
-    private void printWithLevel(String level, String content) {
-        System.out.println(
-            String.format("[%s] |%s| - %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()), level, content)
-        );
-    }
-
-    public void info(String content) {
-        this.printWithLevel("INFO", content);
-    }
-
-    public void answer(BufferedReader in) throws IOException {
-        System.out.println(
-    	   String.format("[%s] |%s|", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()), "Server Answer")
-    	);
-    	String s = in.readLine();
-    	while (s != null) { 		
-            System.out.println(s);
-            if(in.ready()) {
-            	s = in.readLine();
-            }
-            else {
-            	return;
-            }
-        }
-    }
-}
 public class MyHttpClient {
 	
     private final int PORT;
@@ -43,8 +15,14 @@ public class MyHttpClient {
     private BufferedReader in;
     private PrintWriter out;
     private Socket socket;
-    private ClientLogger logger;
+    private Logger logger;
     
+    /**
+     * Creates a MyHttpClient with of a server with a given hostname and connects trough a given portNumber
+     * @param hostName server hostname
+     * @param portNumber server port to make connection
+     * @throws IOException
+     */
 	public MyHttpClient(String hostName, int portNumber) throws IOException {
 		this.HOST_NAME = hostName;
 		this.PORT = portNumber;
@@ -53,9 +31,13 @@ public class MyHttpClient {
 		this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		this.out = new PrintWriter(socket.getOutputStream(),true);	
 		
-		this.logger = new ClientLogger();
+		this.logger = new Logger();
 	}
-
+	/**
+	 * Sends a http GET request 
+	 * @param ObjectName name of the file to access
+	 * @throws IOException
+	 */
 	public void getResource(String ObjectName) throws IOException {
 		this.logger.info("Making GET request to server");
 		out.print(
@@ -68,6 +50,11 @@ public class MyHttpClient {
 		this.logger.answer(in);
 	}
 	
+	/**
+	 * Sends a http POST request
+	 * @param data data to send to the server
+	 * @throws IOException
+	 */
 	public void postData(String[] data) throws IOException {
 		this.logger.info("Making POST request to server");
 		out.print(
@@ -80,6 +67,11 @@ public class MyHttpClient {
 		this.logger.answer(in);
 	}
 	
+	/**
+	 * Sends an http request with a method name not supported by MyHttpServer
+	 * @param wrongMethodName the unimplemented method to send
+	 * @throws IOException
+	 */
 	public void sendUnimplementedMethod (String wrongMethodName) throws IOException {
 		this.logger.info("Making a request to an unimplementedMethod to server");
 		out.print(
@@ -92,6 +84,13 @@ public class MyHttpClient {
 		this.logger.answer(in);
 	}
 	
+	/**
+	 * Sends a malformed http GET of types i -> character "\r\n" not present after the request line, 
+	 * ii -> presence of additional space characters between the fields of the request line
+	 * iii -> HTTP version field not present in the request
+	 * @param type the type of malformedRequest to send
+	 * @throws IOException
+	 */
 	public void malformedRequest(int type) throws IOException {
 		switch (type) {
 			case 1:
@@ -111,6 +110,9 @@ public class MyHttpClient {
 		this.logger.answer(in);
 	}
 	
+	/**
+	 * closes the communication between client and server
+	 */
 	public void close() {
 		try {
 			out.print("DELETE /session HTTP/1.1" + Util.CRLF + "Connection: close" + Util.CRLF);
