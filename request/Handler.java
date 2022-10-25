@@ -109,6 +109,17 @@ public class Handler extends Thread {
         }    
     }
 
+    private void handle_get_request(String endpoint) {
+        if (this.contentDirectory.containsKey(endpoint)) {
+            this.logger.info("Received a valid GET request to an existing resource! Returning 200");
+            out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(endpoint) + Util.CRLF);
+        }
+        else {
+            this.logger.info("Received a valid GET request to an unavailable resource! Returning 404");
+            out.println("HTTP/1.1 404 Not Found");
+        }
+    }
+
 
     private void handle_request() throws IOException, InterruptedException {
         if (this.socket.getInputStream().available() <= 0)
@@ -140,14 +151,7 @@ public class Handler extends Thread {
 
                 switch (requestLine.getMethod()) {
                     case "GET":
-                        if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
-                            this.logger.info("Received a valid GET request to an existing resource! Returning 200");
-                            out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(requestLine.getEndpoint()) + Util.CRLF);
-                        }
-                        else {
-                            this.logger.info("Received a valid GET request to an unavailable resource! Returning 404");
-                            out.println("HTTP/1.1 404 Not Found");
-                        }
+                        this.handle_get_request(requestLine.getEndpoint());
                         break;
                     case "POST":
                         this.handle_post_request(requestLine.getEndpoint(), info.getPayload());
