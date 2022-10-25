@@ -78,16 +78,22 @@ public class Handler extends Thread {
 
     @Override
     public void run() {
-        this.logger.info("Handling new client!");
-        while (!this.socket.isClosed()){ 
-            try { 
-                this.handle_request();
-            } catch (Exception e) {
-                this.logger.error("Unable to handle request.");
-            }  
-            
-        }
-        this.logger.info("Finished client handling!");
+        try {
+			this.logger.info("Handling new client!");
+			this.idRegistry.add(this.id);
+			if (this.idRegistry.size() > MAX_THREADS) {
+				this.logger.error(THREADS_EXCEEDED_ERROR);
+				out.println("HTTP/1.1 503 Service Unavailable " + Util.CRLF);
+				this.socket.close();
+			}
+			while (!this.socket.isClosed()) {
+				this.handle_request();
+			}
+			this.logger.info("Finished client handling!");
+			this.idRegistry.remove(Integer.valueOf(id));
+		} catch (Exception e) {
+			this.logger.error("Unable to handle request.");
+		}
     }
 
     private void handle_post_request(String endpoint, String requestPayload) {
@@ -126,56 +132,47 @@ public class Handler extends Thread {
             return;           
 
         this.logger.info("Handling new request!");
+        this.logger.info("Parsing data from socket!");
+        RequestInfo info = new RequestInfo(in);
+        this.logger.info("Finished request info parsing!");
 
-        if (this.idRegistry.size() >= MAX_THREADS) {
-            this.logger.error(THREADS_EXCEEDED_ERROR);
-            out.println("HTTP/1.1 503 Service Unavailable " + Util.CRLF);
-        } else {
-            this.idRegistry.add(this.id);
-            
-            this.logger.info("Parsing data from socket!");
-            RequestInfo info = new RequestInfo(in);
-            this.logger.info("Finished request info parsing!");
-                
-            RequestLine requestLine = info.getRequestLine();
-            RequestHeaders requestHeaders = info.getRequestHeaders();
-                
-            this.logger.info(info.toString());
-            this.logger.info("Preparing response!");
+        RequestLine requestLine = info.getRequestLine();
+        RequestHeaders requestHeaders = info.getRequestHeaders();
 
-            if (requestLine.isValid() && requestHeaders.isValid()) {
-                if (requestHeaders.contains("Connection: close" + Util.CRLF)) {
-                    this.logger.info("Received a close connection header. Closing connection after sending a response!");
-                    this.closeConnection = true;
-                }
+        this.logger.info(info.toString());
+        this.logger.info("Preparing response!");
 
-                switch (requestLine.getMethod()) {
-                    case "GET":
-                        this.handle_get_request(requestLine.getEndpoint());
-                        break;
-                    case "POST":
-                        this.handle_post_request(requestLine.getEndpoint(), info.getPayload());
-                        break;
-                    default:
-                        this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
-                        out.println("HTTP/1.1 405 Method Not Allowed");
-                        break;
-                }
-            }
-            else {
-                this.logger.error("Invalid request! Returning 400 Bad Request");
-                out.println("HTTP/1.1 400 Bad Request");
+        if (requestLine.isValid() && requestHeaders.isValid()) {
+            if (requestHeaders.contains("Connection: close" + Util.CRLF)) {
+                this.logger.info("Received a close connection header. Closing connection after sending a response!");
+                this.closeConnection = true;
             }
 
-            if (this.closeConnection) {
-                this.socket.close();
+            switch (requestLine.getMethod()) {
+                case "GET":
+                    this.handle_get_request(requestLine.getEndpoint());
+                    break;
+                case "POST":
+                    this.handle_post_request(requestLine.getEndpoint(), info.getPayload());
+                    break;
+                default:
+                    this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");
+                    out.println("HTTP/1.1 405 Method Not Allowed");
+                    break;
             }
+        }
+        else {
+            this.logger.error("Invalid request! Returning 400 Bad Request");
+            out.println("HTTP/1.1 400 Bad Request");
+        }
 
-            if (System.getenv("DEBUG") != null) {
-                this.logger.info("For debug purposes, pausing this execution...");
-                Thread.sleep(6000);
-            }
-            this.idRegistry.remove(Integer.valueOf(id));
+        if (this.closeConnection) {
+            this.socket.close();
+        }
+
+        if (System.getenv("DEBUG") != null) {
+            this.logger.info("For debug purposes, pausing this execution...");
+            Thread.sleep(6000);
         }
             
         this.logger.info("Request processing is finished.");
