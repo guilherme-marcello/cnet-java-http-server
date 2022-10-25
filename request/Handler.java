@@ -91,7 +91,10 @@ public class Handler extends Thread {
                 break;
         }    
     }
-
+	/**
+	 * handles this Handler http GET requests
+	 * @param endpoint the name of the resource to get
+	 */
     private void handle_get_request(String endpoint) {
         if (this.contentDirectory.containsKey(endpoint)) {
             this.logger.info("Received a valid GET request to an existing resource! Returning 200");
@@ -102,9 +105,13 @@ public class Handler extends Thread {
             out.println("HTTP/1.1 404 Not Found");
         }
     }
-
-
+	/**
+	 * handles this Handler http requests
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
     private void handle_request() throws IOException, InterruptedException {
+	//checks if the number of expected bytes in the sockets is more than 0
         if (this.socket.getInputStream().available() <= 0)
             return;           
 
