@@ -9,7 +9,7 @@ import java.util.Date;
  */
 public class Logger {
 	//a way of identifying in which thread the Logger Object is running
-	private String prefix;
+	private String prefix = "";
 	/**
 	 * Creates a Logger object with an id
 	 * @param id identifier of the thread in which the Logger is running
@@ -33,7 +33,7 @@ public class Logger {
 	private void printWithLevel(String level, String content) {
 		System.out.println(
 				String.format("%s[%s] |%s| - %s", this.prefix, new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()), level, content)
-				);
+		);
 	}
 	
 	/**
