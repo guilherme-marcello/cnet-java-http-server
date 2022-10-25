@@ -228,6 +228,37 @@ public class Handler extends Thread {
         this.logger.info("Finished client handling!");
     }
 
+    private void handle_post_request(String endpoint, String requestPayload) {
+        switch (endpoint) {
+            case "/simpleForm.html":
+                if (Models.isSimpleFormPayloadValid(requestPayload)) {
+                    this.logger.info("Received a valid POST request with correct format! Returning 200");
+                    out.println("HTTP/1.1 200 OK");
+                }
+                else {
+                    this.logger.info("Received a valid POST request with an incorrect format! Returning 406");
+                    out.println("HTTP/1.1 406 not Acceptable");
+                }
+                break;
+            default:
+                this.logger.info("Received a valid POST request to an unavailable endpoint! Returning 404");
+                out.println("HTTP/1.1 404 Not Found");
+                break;
+        }    
+    }
+
+    private void handle_get_request(String endpoint) {
+        if (this.contentDirectory.containsKey(endpoint)) {
+            this.logger.info("Received a valid GET request to an existing resource! Returning 200");
+            out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(endpoint) + Util.CRLF);
+        }
+        else {
+            this.logger.info("Received a valid GET request to an unavailable resource! Returning 404");
+            out.println("HTTP/1.1 404 Not Found");
+        }
+    }
+
+
     private void handle_request() throws IOException, InterruptedException {
         if (this.socket.getInputStream().available() <= 0)
             return;           
@@ -252,29 +283,16 @@ public class Handler extends Thread {
 
             if (requestLine.isValid() && requestHeaders.isValid()) {
                 if (requestHeaders.contains("Connection: close" + Util.CRLF)) {
-                    this.logger.info("Received a close connection header. Closing connection after sending response!");
+                    this.logger.info("Received a close connection header. Closing connection after sending a response!");
                     this.closeConnection = true;
                 }
 
                 switch (requestLine.getMethod()) {
                     case "GET":
-                        if (this.contentDirectory.containsKey(requestLine.getEndpoint())) {
-                            this.logger.info("Received a valid GET request to an existing resource! Returning 200");
-                            out.println("HTTP/1.1 200 OK" + Util.CRLF + Util.CRLF + this.contentDirectory.get(requestLine.getEndpoint()) + Util.CRLF);
-                        }
-                        else {
-                            this.logger.info("Received a valid GET request to an unavailable resource! Returning 404");
-                            out.println("HTTP/1.1 404 Not Found");
-                        }
+                        this.handle_get_request(requestLine.getEndpoint());
                         break;
                     case "POST":
-                    	if (Models.isPayLoadValid(info.getPayload())) {
-                    		out.println("HTTP/1.1 200 OK");
-               			}
-                    	else {
-                    		this.logger.info("Received a valid POST request with an incorret format! Return 406");
-                    		out.println("HTTP/1.1 406 not Acceptable");
-                    	}
+                        this.handle_post_request(requestLine.getEndpoint(), info.getPayload());
                         break;
                     default:
                         this.logger.error("Method is not implemented (is not GET nor POST)! Returning 405 Method Not Allowed");

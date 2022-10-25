@@ -1,3 +1,4 @@
+package request;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -16,7 +17,7 @@ public class Models {
         return headerMatcher.matches();
     }
     
-    public static boolean isPayLoadValid (String payload) {
+    public static boolean isSimpleFormPayloadValid(String payload) {
     	Matcher payloadMatcher = SIMPLEFORM_PAYLOAD_FORMAT.matcher(payload);
         return payloadMatcher.matches();
     }
