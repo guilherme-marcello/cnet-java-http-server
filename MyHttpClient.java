@@ -17,7 +17,7 @@ public class MyHttpClient {
     private BufferedReader in;
     private PrintWriter out;
     private Socket socket;
-    private ClientLogger logger;
+    private Logger logger;
     	
      /**
      * Creates a MyHttpClient with of a server with a given hostname and connects trough a given portNumber
