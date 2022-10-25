@@ -18,29 +18,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class HandlerLogger {
-    private String prefix;
-    public HandlerLogger(int id) {
-        this.prefix = String.format("[Thread-%d]", id);
-    }
-
-    private void printWithLevel(String level, String content) {
-        System.out.println(
-            String.format("%s[%s] |%s| - %s", this.prefix, new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()), level, content)
-        );
-    }
-
-    public void info(String content) {
-        this.printWithLevel("INFO", content);
-    }
-
-    public void error(String content) {
-        this.printWithLevel("ERROR", content);
-    }
-
-
-}
-
 public class Handler extends Thread {
     private static final int MAX_THREADS = 5;
     private static final String THREADS_EXCEEDED_ERROR = String.format(
@@ -55,7 +32,7 @@ public class Handler extends Thread {
     private int id;
     private HashMap<String, String> contentDirectory;
     private List<Integer> idRegistry;
-    private HandlerLogger logger;
+    private Logger logger;
     public Handler(Socket socket, int id, HashMap<String, String> contentDirectory, List<Integer> idRegistry) throws SocketException, IOException {
         this.socket = socket;
 
@@ -70,7 +47,7 @@ public class Handler extends Thread {
         );            
 
         this.id = id;
-        this.logger = new HandlerLogger(this.id);
+        this.logger = new Logger(this.id);
         this.contentDirectory = contentDirectory;
         this.idRegistry = idRegistry;
 
