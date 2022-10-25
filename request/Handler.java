@@ -18,13 +18,16 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Class that handels the threads
+ */
 public class Handler extends Thread {
     private static final int MAX_THREADS = 5;
     private static final String THREADS_EXCEEDED_ERROR = String.format(
         "The server does not handle more than %d requests simultaneously. Discarding this request.",
         MAX_THREADS
     );
-
+   //go true if it receives a close connection header and turn down the socket
     private boolean closeConnection = false;
     private Socket socket;
     private BufferedReader in;
@@ -33,6 +36,17 @@ public class Handler extends Thread {
     private HashMap<String, String> contentDirectory;
     private List<Integer> idRegistry;
     private Logger logger;
+	
+    /**
+     * Contructor of this Handler
+     * 
+     * @param socket
+     * @param id thread id
+     * @param contentDirectory hashmap with resources available for this server
+     * @param idRegistry list with online sockets
+     * @throws SocketException
+     * @throws IOException
+     */
     public Handler(Socket socket, int id, HashMap<String, String> contentDirectory, List<Integer> idRegistry) throws SocketException, IOException {
         this.socket = socket;
 
