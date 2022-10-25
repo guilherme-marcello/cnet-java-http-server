@@ -6,7 +6,7 @@
 - updated at 25 Oct 2022
 
 ## Authors
-
+- GROUP 09
 - Guilherme Marcelo \<fc58173@alunos.fc.ul.pt\> - [@guilherme-marcello](https://github.com/guilherme-marcello)
 - Rafael Correia \<fc58256@alunos.fc.ul.pt\> - [@Rafacorreia0611](https://github.com/Rafacorreia0611)
 - João Ferreira \<fc58191@alunos.fc.ul.pt\> - [@JFerreira03](https://github.com/JFerreira03)
