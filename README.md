@@ -1,15 +1,12 @@
 ## Overview
-- LEI 2022-23 2nd year 1 semester
-- unidade curricular: Redes de Computadores
-- objective: implementation of highly scalable HTTP-server and its client
-- language: Java - JDK 17 (LTS)
-- updated at 25 Oct 2022
+- Objective: implementation of highly scalable HTTP-server and its client
+- Language: Java - JDK 17 (LTS)
+- Updated at 25 Oct 2022
 
 ## Authors
-- GROUP 09
-- Guilherme Marcelo \<fc58173@alunos.fc.ul.pt\> - [@guilherme-marcello](https://github.com/guilherme-marcello)
-- Rafael Correia \<fc58256@alunos.fc.ul.pt\> - [@Rafacorreia0611](https://github.com/Rafacorreia0611)
-- João Ferreira \<fc58191@alunos.fc.ul.pt\> - [@JFerreira03](https://github.com/JFerreira03)
+- Guilherme Marcelo - [@guilherme-marcello](https://github.com/guilherme-marcello)
+- Rafael Correia - [@Rafacorreia0611](https://github.com/Rafacorreia0611)
+- João Ferreira - [@JFerreira03](https://github.com/JFerreira03)
 
 
 ***** Instructions for compiling, running and testing ***** 
@@ -28,30 +25,6 @@ To build the image and start-up the service with docker-compose, you must run it
 chmod +x ./docker/deploy_server.sh && ./docker/deploy_server.sh
 ```
 
-[STEP 2 - Go inside the server's container in interactive mode and start interactive menu]
-To run the test command, you can enter the container with 
-interactive mode in another console as follows:
-```bash
-    sudo docker exec -it http-server bash
-```
-and run the test program as follows:
-(inside container bash session)
-```bash
-    java TestMP1 http-server 8081
-```
-
-[STEP 3 - Execute test scenarios]
-Use the interactive menu of the test class to generate the client requests and server responses, 
-and after each request/response exchange analyze the respective logs in the console (stdout) to 
-verify that the behaviors conform to those expected.   
-
-
-[STEP 4 - 1.f feature]
-To test the 1.f functionality of the server. We suggest launching different instances 
-of the TestMp1 class until reaching the limit specified above and try to launch and use 
-another instance of the class to interact with the server. A server should react with an error to requests 
-from the last launched instance until all the others are active.
-
 ## Deployment without Docker
 
 [STEP 0 - Extra notes]
@@ -68,10 +41,6 @@ the project normally and run it from the terminal.
 ```bash
     javac MyHttpClient.java
 ```
-- Compile TestMP1.java and its dependencies
-```bash
-    javac TestMP1.java
-```
 
 [STEP 2 - Start HTTP server]
 Open a terminal and launch the server class:
@@ -80,20 +49,3 @@ connections is the value of SERVER_PORT environment variable - that is 8081 by d
 ```bash
     java mp1.MyHttpServer
 ```
-
-[STEP 3 - Start tests]
-```bash
-    java TestMP1 localhost 8081
-```
-
-[STEP 4 - Execute test scenarios]
-Use the interactive menu of the test class to generate the client requests and server responses, 
-and after each request/response exchange analyze the respective logs in the console (stdout) to 
-verify that the behaviors conform to those expected.   
-
-
-[STEP 5 - 1.f feature]
-To test the 1.f functionality of the server. We suggest launching different instances 
-of the TestMp1 class until reaching the limit specified above and try to launch and use 
-another instance of the class to interact with the server. A server should react with an error to requests 
-from the last launched instance until all the others are active.
